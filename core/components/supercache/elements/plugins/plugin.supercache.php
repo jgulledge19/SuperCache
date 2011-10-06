@@ -1,16 +1,54 @@
 <?php
+/**
+ * Author: Josh Gulledge
+ * Date: 10/4/2011
+ * 
+ * system setting options: supercache.excludeResources, supercache.includeResources, supercache.timeLimit, 
+ *          supercache.
+ * 
+ * Optionally set up TVs: supercache_use -Y/N, supercache_timeLimit(number in seconds), 
+ */
 $super_options = array('full', 'mobile');
 
+$exclude_resources = array();
+$tmp = $modx->getOption('supercache.excludeResources', $scriptProperties, '');
+if ( !empty($tmp) ) {
+    $exclude_resources = explode(',', $tmp);
+}
+$include_resources = array();
+$tmp = $modx->getOption('supercache.includeResources', $scriptProperties, '');
+if ( !empty($tmp) ) {
+    $include_resources = explode(',', $tmp);
+}
+$time_limit = $modx->getOption('supercache.timeLimit', $scriptProperties, 900);
+$ctime_limit = $modx->getOption('supercache_timeLimit', $scriptProperties, 0);
+
+if ( $ctime_limit > 0 ) {
+    $time_limit = $ctime_limit;
+}
+        
 $eventName = $modx->event->name;
 $page_type = 'full';
+
+if ( !function_exists('allow_supercache') ) {
+    function allow_supercache($id, $excludes, $includes ){
+        if ( is_array($includes) && count($includes) > 0 ) {
+            if ( !in_array($id, $includes) ) {
+                return false;
+            }
+        } elseif ( is_array($excludes) && count($excludes) > 0 ) {
+            if ( in_array($id, $excludes) ) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
 switch($eventName) {
   //  case 'OnWebPageInit':
-  case 'OnLoadWebDocument': // http://rtfm.modx.com/display/revolution20/OnLoadWebDocument
-        /* do something */
-        // OnLoadWebDocument (OnWebPageInit) - get the data from cache
+    case 'OnLoadWebDocument': // http://rtfm.modx.com/display/revolution20/OnLoadWebDocument
         // get( string $key, array $options = array ) : mixed
-    if (is_object($modx->resource)) {
-        if ( !$modx->user->isAuthenticated('mgr') && count($_POST) == 0 && count($_GET) <= 1 ) {
+        if (is_object($modx->resource) && $modx->resource->get('cacheable') && allow_supercache($modx->resource->get('id'), $exclude_resources, $include_resources) && !$modx->user->isAuthenticated('mgr') && count($_POST) == 0 && count($_GET) <= 1 ) {
             if ( isset($_SESSION[$modx->getOption('modmobile.get_var')]) ) {
                 $page_type = $_SESSION[$modx->getOption('modmobile.get_var')];
             }
@@ -20,29 +58,17 @@ switch($eventName) {
             }
             
             $cached_data = $modx->cacheManager->get('supercache_'.$modx->resource->get('id'));//, array('page_type' => $page_type));
-            // error_log('Page type: '. $page_type.' post: '. http_build_query($_POST) );
-            //echo 'POST: '.print_r($_POST); array_to_string();
             if ( isset($cached_data[$page_type]) && !empty($cached_data[$page_type]) ) {
-                //echo '<br>-----Cache?';
-                // error_log('Load Page from cache: supercache_'.$modx->resource->get('id'));
-                // It would be much more ideal to set the content output to the last output, but this did not seem to cut out the processing script.
-                $modx->resource->_output = $cached_data[$page_type];
+                // this is setting the content/output to the cached file - the saved processed output
+                $modx->resource->_content = $modx->resource->_output = $cached_data[$page_type];
                 $modx->resource->set('content', $cached_data[$page_type]);
-                $modx->resource->set('Template', 0);
-                //
-                @session_write_close();
-                echo $cached_data[$page_type]; 
-                //exit();
-                //echo $modx->resource->_output;
-                while (@ ob_end_flush()) {}
-                exit();
+                $modx->resource->setProcessed(true);
             }
         }
-    }
         break;
     case 'OnWebPagePrerender': // Not in the docs
         /* write output to file */
-        if ( !$modx->user->isAuthenticated('mgr') && count($_POST) == 0 && count($_GET) <= 1) {
+        if ( !$modx->user->isAuthenticated('mgr') && $modx->resource->get('cacheable') && allow_supercache($modx->resource->get('id'), $exclude_resources, $include_resources) && count($_POST) == 0 && count($_GET) <= 1) {
             // set( string $key, mixed $var, integer $lifetime = 0, array $options = array ) : boolean
             if ( isset($_SESSION[$modx->getOption('modmobile.get_var')]) ) {
                 $page_type = $_SESSION[$modx->getOption('modmobile.get_var')];
@@ -54,8 +80,12 @@ switch($eventName) {
                 $data = $cached_data;
             }
             $data[$page_type] = $modx->resource->_output;
-            $modx->cacheManager->set('supercache_'.$modx->resource->get('id'), $data, 300, array('page_type' => $page_type) );
+            $modx->cacheManager->set('supercache_'.$modx->resource->get('id'), $data, $time_limit, array('page_type' => $page_type) );
         }
+        break;
+    case 'OnDocFormSave': // Clear cache on Save
+        $modx->cacheManager->delete('supercache_'.$modx->resource->get('id'));
+        // need an option to clear cache of parents & siblings
         break;
         
 }
