@@ -6,7 +6,7 @@ Since: October 5th, 2011
 Author: Joshua Gulledge <jgulledge19@hotmail.com>
 License: GNU GPLv2 (or later at your option)
 
-SuperCashe is a plugin that will allow you to eliminate text processing of pages
+SuperCashe is a plugin for MODX Revolution that will allow you to eliminate text processing of pages
 therefor possibly speeding them up signifigantly.  Note MODX Revolution already uses a cache
 system to speed up pageload times, this plugin uses the same cache system but in a different way
 to deleiver even faster page loads if you have moderate to complex templates.  On my test box 

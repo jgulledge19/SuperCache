@@ -1,0 +1,6 @@
+SuperCashe is a plugin for MODX Revolution that will allow you to eliminate text processing of pages
+therefor possibly speeding them up signifigantly.  Note MODX Revolution already uses a cache
+system to speed up pageload times, this plugin uses the same cache system but in a different way
+to deleiver even faster page loads if you have moderate to complex templates.  On my test box 
+response was 450 to 600 milliseconds and now with supercache it is 60 to 100 milliseconds.  Note 1000 
+milliseconds is 1 second.  My test box runs on Windows 2008 RC2, IIS 7.5, PHP 5.3.8 and wincache.
