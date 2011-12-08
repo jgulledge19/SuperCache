@@ -44,6 +44,15 @@ if ( !function_exists('allow_supercache') ) {
         return true;
     }
 }
+
+$userIP = $_SERVER['REMOTE_ADDR'];
+$external = false;
+/* Compare for 192.168 range INTERNAL 
+    substr get the first 0 to 7 characters of the $userIP */
+if( substr($userIP, 0, 7) != "192.168" && substr($userIP, 0, 3) != "10." ) {
+    $external = true;
+}
+
 switch($eventName) {
   //  case 'OnWebPageInit':
     case 'OnLoadWebDocument': // http://rtfm.modx.com/display/revolution20/OnLoadWebDocument
@@ -55,6 +64,9 @@ switch($eventName) {
             // error_log('Page type Before: '. $page_type);
             if ( !in_array($page_type,$super_options) ){ 
                 $page_type = 'full';
+            }
+            if ( !$external ) {
+                $page_type = 'internal_'.$page_type;
             }
             
             $cached_data = $modx->cacheManager->get('supercache_'.$modx->resource->get('id'));//, array('page_type' => $page_type));
@@ -72,6 +84,9 @@ switch($eventName) {
             // set( string $key, mixed $var, integer $lifetime = 0, array $options = array ) : boolean
             if ( isset($_SESSION[$modx->getOption('modmobile.get_var')]) ) {
                 $page_type = $_SESSION[$modx->getOption('modmobile.get_var')];
+            }
+            if ( !$external ) {
+                $page_type = 'internal_'.$page_type;
             }
             $data = array();
             // does the cache file already exist with other page data?

@@ -1,8 +1,8 @@
 --------------------
 SuperCache
 --------------------
-Version: 1.0 beta
-Since: October 5th, 2011
+Version: 1.0 beta2
+Since: December 8th, 2011
 Author: Joshua Gulledge <jgulledge19@hotmail.com>
 License: GNU GPLv2 (or later at your option)
 
