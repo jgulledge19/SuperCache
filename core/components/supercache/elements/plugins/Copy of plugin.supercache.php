@@ -79,11 +79,8 @@ switch($eventName) {
             if ( is_array($cached_data) ) {
                 $data = $cached_data;
             }
-            if ( !isset($data[$page_type]) ) {
-                // only set if the data is
-                $data[$page_type] = $modx->resource->_output;
-                $modx->cacheManager->set('supercache_'.$modx->resource->get('id'), $data, $time_limit, array('page_type' => $page_type) );
-            }
+            $data[$page_type] = $modx->resource->_output;
+            $modx->cacheManager->set('supercache_'.$modx->resource->get('id'), $data, $time_limit, array('page_type' => $page_type) );
         }
         break;
     case 'OnDocFormSave': // Clear cache on Save
