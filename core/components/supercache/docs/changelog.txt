@@ -1,0 +1,8 @@
+==========================
+1.0 rc1 1/16/2012 
+ - Released as an extra in the MODX extras.
+ - created build script for auto install via packagemanager. 
+ 
+==========================
+1.0 beta2 12/8/2011 
+ - added ip stuff to allow for different internal and exturnal caches. 
