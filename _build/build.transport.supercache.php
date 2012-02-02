@@ -52,7 +52,7 @@
 define('PKG_NAME','SuperCache');
 define('PKG_NAME_LOWER','supercache');
 define('PKG_VERSION','1.0.0');
-define('PKG_RELEASE','rc');
+define('PKG_RELEASE','pl');
 define('PKG_CATEGORY','SuperCache');
 
 /* Set package options - you can turn these on one-by-one
