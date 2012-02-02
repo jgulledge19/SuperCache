@@ -102,8 +102,8 @@ switch($eventName) {
         }
         break;
     case 'OnDocFormSave': // Clear cache on Save
-        if ( is_object($modx->resource) ) {
-            $modx->cacheManager->delete('supercache_'.$modx->resource->get('id'));
+        if ( $resource ) {
+            $modx->cacheManager->delete('supercache_'.$resource->get('id'));
             // need an option to clear cache of parents & siblings
         }
         break;
